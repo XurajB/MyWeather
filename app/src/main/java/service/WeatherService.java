@@ -70,7 +70,7 @@ public class WeatherService {
 
                         JSONArray error = data.optJSONArray("error");
                         if (error!=null) {
-                            mWeatherServiceCallback.onFailure(error.optJSONObject(0).optString("msg"));
+                            mWeatherServiceCallback.onFailure(location+ " "+ error.optJSONObject(0).optString("msg"));
                             return;
                         }
                         WeatherData weatherData = new WeatherData();

@@ -30,21 +30,22 @@ import service.DownloadIconTask;
 import service.WeatherService;
 import service.WeatherServiceCallback;
 
-
 public class MyWeatherActivity extends AppCompatActivity implements WeatherServiceCallback{
 
     private ImageView mImageViewConditionIcon;
     private TextView mTextViewTemperature;
     private TextView mTextViewCondition;
     private TextView mTextViewLocation;
+    private TextView mTextViewPrecipitation;
 
     private ArrayList<Weather> mForecastData;
 
     private ProgressDialog mProgressDialog;
 
     private static final String DEFAULT_LOCATION = "Chicago, IL";
-    private String mCustomLocation, mTempLocation = DEFAULT_LOCATION;
+    private static final String KEY_LOCATION = "CurrentLocation";
 
+    private String mCurrentLocation, mTempLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +56,20 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         mTextViewTemperature = (TextView)findViewById(R.id.weather_activity_text_view_temperature);
         mTextViewCondition = (TextView)findViewById(R.id.weather_activity_text_view_condition);
         mTextViewLocation = (TextView)findViewById(R.id.weather_activity_text_view_location);
+        mTextViewPrecipitation = (TextView)findViewById(R.id.weather_activity_text_view_precipitation);
 
         ActionBar bar  = getSupportActionBar();
         bar.setDisplayShowHomeEnabled(true);
         bar.setIcon(R.mipmap.ic_launcher);
 
-        loadWeatherData(DEFAULT_LOCATION);
+        if (savedInstanceState != null) {
+            mCurrentLocation = savedInstanceState.getString(KEY_LOCATION);
+            mTempLocation = mCurrentLocation;
+        } else {
+            mCurrentLocation = DEFAULT_LOCATION;
+            mTempLocation = DEFAULT_LOCATION;
+        }
+        loadWeatherData(mCurrentLocation);
 
         RelativeLayout mLayout = (RelativeLayout)findViewById(R.id.weather_activity_relative_layout_main);
         mLayout.setOnClickListener(new View.OnClickListener() {
@@ -74,7 +83,7 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
                 ft.addToBackStack(null);
 
                 // Create and show the dialog.
-                DialogFragment newFragment = ForecastDialog.newInstance(mForecastData, mCustomLocation);
+                DialogFragment newFragment = ForecastDialog.newInstance(mForecastData, mCurrentLocation);
                 newFragment.show(ft, "dialog");
             }
         });
@@ -91,7 +100,7 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
 
     @Override
     public void onSuccess(WeatherData weatherData) {
-        mCustomLocation = mTempLocation;
+        mCurrentLocation = mTempLocation;
         if (mProgressDialog.isShowing()) mProgressDialog.hide();
 
         try {
@@ -103,10 +112,12 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         mTextViewTemperature.setText(weatherData.getCurrentCondition().getTemperature() + "° F");
         mTextViewCondition.setText(weatherData.getCurrentCondition().getDescription());
         mTextViewLocation.setText(weatherData.getRequest().getLocationQuery());
+        mTextViewPrecipitation.setText("Precipitation: " + weatherData.getCurrentCondition().getPrecipitation());
+
         mForecastData  = weatherData.getWeatherList();
 
         // Update the title bar with current location
-        setTitle(" " + mCustomLocation);
+        setTitle(" " + mCurrentLocation);
 
     }
 
@@ -114,6 +125,7 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
     public void onFailure(String message) {
         if (mProgressDialog.isShowing()) mProgressDialog.hide();
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        mTempLocation = mCurrentLocation;
     }
 
     @Override
@@ -132,7 +144,7 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
                 openEditLocation();
                 return true;
             case R.id.action_refresh:
-                loadWeatherData(mCustomLocation);
+                loadWeatherData(mCurrentLocation);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -147,7 +159,7 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         final EditText input = new EditText(this);
         // Specify the type of input expected;
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-
+        input.setText(mCurrentLocation);
         builder.setView(input);
 
 
@@ -178,5 +190,12 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
     private int convertDpToPx(int dpValue) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 dpValue, getResources().getDisplayMetrics());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save UI state changes to the savedInstanceState.
+        savedInstanceState.putString(KEY_LOCATION, mCurrentLocation);
+        super.onSaveInstanceState(savedInstanceState);
     }
 }
