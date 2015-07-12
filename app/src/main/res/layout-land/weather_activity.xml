@@ -24,14 +24,15 @@
             android:src="@drawable/default_condition"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp" />
+            android:layout_marginTop="20dp"
+            android:contentDescription="@null" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="temp data"
-            android:textSize="40dp"
+            android:text="@string/weather_activity_temperature_text"
+            android:textSize="40sp"
             android:textColor="@android:color/white"
             android:id="@+id/weather_activity_text_view_temperature"
             android:layout_below="@+id/weather_activity_image_view_condition_icon"
@@ -43,7 +44,7 @@
             android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textStyle="bold"
-            android:text="description"
+            android:text="@string/weather_activity_temp_description"
             android:id="@+id/weather_activity_text_view_condition"
             android:layout_below="@+id/weather_activity_text_view_temperature"
             android:layout_centerHorizontal="true" />
@@ -53,7 +54,7 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="location"
+            android:text="@string/weather_activity_location"
             android:id="@+id/weather_activity_text_view_location"
             android:layout_above="@+id/weather_activity_image_view_condition_icon"
             android:layout_centerHorizontal="true" />
@@ -62,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Current Condition"
+            android:text="@string/weather_activity_current_condition_text"
             android:textColor="@android:color/white"
             android:id="@+id/textView"
             android:layout_above="@+id/weather_activity_text_view_location"
@@ -73,7 +74,7 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Precipitation: 10 mm"
+            android:text="@string/weather_activity_precipitation_text"
             android:id="@+id/weather_activity_text_view_precipitation"
             android:layout_below="@+id/weather_activity_text_view_condition"
             android:layout_centerHorizontal="true" />

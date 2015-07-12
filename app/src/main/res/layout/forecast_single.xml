@@ -8,8 +8,9 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@null"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Mon"
+        android:text="@string/forecast_single_date_text"
         android:textStyle="bold"
         android:id="@+id/forecast_single_text_view_day" />
 
@@ -34,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:text="80/65"
+                android:text="@string/forecast_single_min_max_text"
                 android:textStyle="italic"
                 android:id="@+id/forecast_single_text_view_high_low" />
 
@@ -42,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:text="Partly Cloudy"
+                android:text="@string/forecast_single_temp_description"
                 android:id="@+id/forecast_single_text_view_description" />
 
         </LinearLayout>
@@ -54,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Precipitation 8.1"
+        android:text="@string/forecast_single_precipitation_text"
         android:id="@+id/forecast_single_text_view_precipitation" />
 
 </LinearLayout>
