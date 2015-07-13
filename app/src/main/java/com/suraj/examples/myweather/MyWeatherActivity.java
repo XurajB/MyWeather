@@ -58,7 +58,7 @@ public class MyWeatherActivity extends AppCompatActivity implements ServiceCallb
 
     /** Default location is set to Chicago, IL */
     private static final String DEFAULT_LOCATION_CITY = "Chicago";
-    private static final String DEFAULT_LOCATION_REGION = "IL";
+    private static final String DEFAULT_LOCATION_REGION = "Illinois";
 
     /** Variables to preserve location data for orientation changes */
     private static final String KEY_CITY = "KeyCity";
@@ -85,8 +85,7 @@ public class MyWeatherActivity extends AppCompatActivity implements ServiceCallb
 
         /** Save the current location in Bundle so it can be retrieved after orientation change */
         if (savedInstanceState != null) {
-            mCurrentLocation.setAreaName(savedInstanceState.getString(KEY_CITY));
-            mCurrentLocation.setRegion(savedInstanceState.getString(KEY_REGION));
+            mCurrentLocation = new Location(savedInstanceState.getString(KEY_CITY),savedInstanceState.getString(KEY_REGION));
             mTempLocation = mCurrentLocation;
         } else {
             mCurrentLocation = new Location(DEFAULT_LOCATION_CITY,DEFAULT_LOCATION_REGION);

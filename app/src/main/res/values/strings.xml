@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">My Weather</string>
 
-    <string name="action_edit_location">Edit Location</string>
+    <string name="action_search_location">Search Location</string>
     <string name="action_refresh">Refresh</string>
     <string name="title_activity_forecast">ForecastActivity</string>
     <string name="weather_activity_temperature_text">temp data</string>
@@ -21,7 +21,7 @@
     <string name="fahrenheit_unit">°F</string>
     <string name="loading_message">Loading..</string>
     <string name="searching_message">Searching..</string>
-    <string name="edit_location_title">Edit Location</string>
+    <string name="search_location_title">Search Location</string>
     <string name="enter_valid_location_text">Please enter a valid location</string>
     <string name="ok_text">OK</string>
     <string name="cancel_text">Cancel</string>
