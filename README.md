@@ -11,3 +11,5 @@ Assumptions
 * All temperature measurements are done in Fahrenheit (°F).
 * Only mobile views are created. Layouts for Tablet and other displays are not provided.
 
+Screen shots:
+https://github.com/XurajB/MyWeather/tree/master/screen_shots
