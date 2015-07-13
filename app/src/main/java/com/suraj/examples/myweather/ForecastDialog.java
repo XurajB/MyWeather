@@ -14,6 +14,7 @@ import android.widget.GridView;
 
 import java.util.ArrayList;
 
+import model.Location;
 import model.Weather;
 
 /**
@@ -32,10 +33,10 @@ public class ForecastDialog extends DialogFragment {
      * @param currentLocation location
      * @return forecast dialog
      */
-    static ForecastDialog newInstance(ArrayList<Weather> forecastData, String currentLocation) {
+    static ForecastDialog newInstance(ArrayList<Weather> forecastData, Location currentLocation) {
         ForecastDialog f = new ForecastDialog();
         mForecast = forecastData;
-        mCurrentLocation = currentLocation;
+        mCurrentLocation = currentLocation.toString();
         return f;
     }
 
@@ -47,7 +48,7 @@ public class ForecastDialog extends DialogFragment {
         getDialog().setTitle(mCurrentLocation + getActivity().getString(R.string.five_day_forecast_title));
         /** Create ForecastGridAdapter and pass context and forecast data to display in UI */
         ForecastGridAdapter forecastGridAdapter = new ForecastGridAdapter(getActivity(), mForecast);
-        GridView mForecastGrid = (GridView)forecastView.findViewById(R.id.weather_activity_forecast_grid);
+        GridView mForecastGrid = (GridView)forecastView.findViewById(R.id.weather_fragment_forecast_grid);
         mForecastGrid.setAdapter(forecastGridAdapter);
         return forecastView;
     }

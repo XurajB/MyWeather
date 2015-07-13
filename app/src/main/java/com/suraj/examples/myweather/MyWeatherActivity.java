@@ -28,19 +28,20 @@ import android.widget.Toast;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
+import model.Location;
 import model.Weather;
 import model.WeatherData;
 import service.DownloadIconTask;
 import service.WeatherService;
-import service.WeatherServiceCallback;
+import service.ServiceCallback;
 
 /**
  * Main activity for the application. It sets the UI for the user to interact with
- * The weather information is received from the WeatherService class by passing location.
- * Implements WeatherServiceCallback interface to indicate/update UI for successful or
- * failed operations.
+ * the weather information received from the WeatherService class.
+ * Implements ServiceCallback and LocationDialogCallback interface to indicate/update UI for successful or
+ * failed operations and to update weather when user selects an item from location search dialog.
  */
-public class MyWeatherActivity extends AppCompatActivity implements WeatherServiceCallback{
+public class MyWeatherActivity extends AppCompatActivity implements ServiceCallback, LocationDialogCallback {
 
     /** UI elements */
     private ImageView mImageViewConditionIcon;
@@ -56,10 +57,14 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
     private ProgressDialog mProgressDialog;
 
     /** Default location is set to Chicago, IL */
-    private static final String DEFAULT_LOCATION = "Chicago, IL";
-    private static final String KEY_LOCATION = "CurrentLocation";
+    private static final String DEFAULT_LOCATION_CITY = "Chicago";
+    private static final String DEFAULT_LOCATION_REGION = "IL";
 
-    private String mCurrentLocation, mTempLocation;
+    /** Variables to preserve location data for orientation changes */
+    private static final String KEY_CITY = "KeyCity";
+    private static final String KEY_REGION = "KeyRegion";
+
+    private Location mCurrentLocation, mTempLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,11 +85,12 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
 
         /** Save the current location in Bundle so it can be retrieved after orientation change */
         if (savedInstanceState != null) {
-            mCurrentLocation = savedInstanceState.getString(KEY_LOCATION);
+            mCurrentLocation.setAreaName(savedInstanceState.getString(KEY_CITY));
+            mCurrentLocation.setRegion(savedInstanceState.getString(KEY_REGION));
             mTempLocation = mCurrentLocation;
         } else {
-            mCurrentLocation = DEFAULT_LOCATION;
-            mTempLocation = DEFAULT_LOCATION;
+            mCurrentLocation = new Location(DEFAULT_LOCATION_CITY,DEFAULT_LOCATION_REGION);
+            mTempLocation = mCurrentLocation;
         }
         loadWeatherData(mCurrentLocation);
 
@@ -111,7 +117,8 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
      * Load weather data from API
      * @param location user entered location
      */
-    private void loadWeatherData(String location) {
+    private void loadWeatherData(Location location) {
+        mTempLocation = location;
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.loading_message));
         mProgressDialog.show();
@@ -123,7 +130,8 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
     /** This method gets called when the WeatherService gets weather data successfully using API call.
      * Weather data is passed with this method. */
     @Override
-    public void onSuccess(WeatherData weatherData) {
+    public void onSuccess(Object data) {
+        WeatherData weatherData = (WeatherData)data;
         mCurrentLocation = mTempLocation;
         if (mProgressDialog.isShowing()) mProgressDialog.hide();
 
@@ -136,8 +144,8 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         /** Update UI with received weather data */
         mTextViewTemperature.setText(weatherData.getCurrentCondition().getTemperature() + getString(R.string.fahrenheit_unit));
         mTextViewCondition.setText(weatherData.getCurrentCondition().getDescription());
-        mTextViewLocation.setText(weatherData.getRequest().getLocationQuery());
-        mTextViewPrecipitation.setText(getString(R.string.precipitation_title)+ weatherData.getCurrentCondition().getPrecipitation());
+        mTextViewLocation.setText(mCurrentLocation.toString());
+        mTextViewPrecipitation.setText(getString(R.string.precipitation_title) + weatherData.getCurrentCondition().getPrecipitation());
 
         mForecastData  = weatherData.getWeatherList();
 
@@ -168,7 +176,8 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         /** Handle presses on the action bar items */
         switch (item.getItemId()) {
             case R.id.action_settings:
-                openEditLocation();
+                //openEditLocation();
+                openLocationSearch();
                 return true;
             case R.id.action_refresh:
                 loadWeatherData(mCurrentLocation);
@@ -178,52 +187,30 @@ public class MyWeatherActivity extends AppCompatActivity implements WeatherServi
         }
     }
 
-    /**
-     * Open alert dialog for editing location. The WeatherService is called after new location is entered
-     */
-    private void openEditLocation() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.edit_location_title));
-        /** Set up the input */
-        final EditText input = new EditText(this);
-        /** Specify the type of input expected */
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setText(mCurrentLocation);
-        builder.setView(input);
+    /** Instantiate search location fragment and display on screen */
+    private void openLocationSearch() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("location_dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
 
-        /** Set up the buttons */
-        builder.setPositiveButton(getString(R.string.ok_text), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String inputLocation = input.getText().toString();
-                if (inputLocation.length()>0) {
-                    loadWeatherData(inputLocation);
-                    mTempLocation = inputLocation;
-                } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.enter_valid_location_text), Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-        builder.setNegativeButton(getString(R.string.cancel_text), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-    }
-
-    /** Converts DP values to Pixels */
-    private int convertDpToPx(int dpValue) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                dpValue, getResources().getDisplayMetrics());
+        /** Create and show the dialog. */
+        DialogFragment newFragment = LocationDialog.newInstance(this);
+        newFragment.show(ft, "location_dialog");
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         /** Save UI state changes to the savedInstanceState. */
-        savedInstanceState.putString(KEY_LOCATION, mCurrentLocation);
+        savedInstanceState.putString(KEY_CITY, mCurrentLocation.getAreaName());
+        savedInstanceState.putString(KEY_REGION, mCurrentLocation.getRegion());
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onSelectLocation(Location location) {
+        loadWeatherData(location);
     }
 }

@@ -23,7 +23,7 @@ public class DownloadIconTask extends AsyncTask<String, Void, Bitmap> {
      * Constructor to pass icon URL and ImageView object
      * @param iconUrl The URL for the weather icon
      * @param iconView The imageView where icon should be placed
-     * @throws MalformedURLException
+     * @throws MalformedURLException if provided URL is not valid
      */
     public DownloadIconTask(String iconUrl, ImageView iconView) throws MalformedURLException {
         this.iconImageView = iconView;

@@ -16,39 +16,36 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 import model.Location;
-import model.WeatherData;
 
 /**
- * Created by suraj bhattarai on 7/10/15.
- * This class gets weather data from the World Weather Online API using unique API KEY.
+ * Created by surajbhattarai on 7/12/15.
+ * This class gets location data from the Search API
  */
-public class WeatherService {
+public class LocationService {
     private ServiceCallback mServiceCallback;
     private Context mContext;
 
-    /** Unique API key and End point URL */
-    public static final String API_KEY = "b315fed477ad4084a7f848f218956";
-    private static final String API_ENDPOINT = "http://api.worldweatheronline.com/free/v2/weather.ashx?key=%s&q=%s&num_of_days=5&tp=24&format=json";
+    private static final String API_ENDPOINT = "http://api.worldweatheronline.com/free/v2/search.ashx?key=%s&query=%s&num_of_results=5&format=json";
 
     /** Constructor to pass a callback object and context */
-    public WeatherService(ServiceCallback serviceCallback, Context context) {
+    public LocationService(ServiceCallback serviceCallback, Context context) {
         this.mServiceCallback = serviceCallback;
         this.mContext = context;
     }
 
     /**
-     * Get weather data from API using worker thread. Open URL connection and fetch data line by line
-     * @param location location
+     * Get possible location data from API using worker thread. Open URL connection and fetch data line by line
+     * @param query location query
      */
-    public void getWeatherData(final Location location) {
-        new AsyncTask<Location, Void, String>() {
+    public void getLocationData(final String query) {
+        new AsyncTask<String, Void, String>() {
             @Override
-            protected String doInBackground(Location... params) {
-                /** Combine API URL, API key and location into one URL */
-                String apiUrl = String.format(API_ENDPOINT,Uri.encode(API_KEY),
-                        Uri.encode(location.getAreaName()) + "," + Uri.encode(location.getRegion()));
+            protected String doInBackground(String... params) {
+                /** Combine API URL, API key and query into one URL */
+                String apiUrl = String.format(API_ENDPOINT, Uri.encode(WeatherService.API_KEY),Uri.encode(query));
                 try {
                     URL endPointUrl = new URL(apiUrl);
                     URLConnection urlConnection = endPointUrl.openConnection();
@@ -62,7 +59,7 @@ public class WeatherService {
                     /** Close connections */
                     inputStream.close();
                     bufferedReader.close();
-                    /** Return weather data */
+                    /** Return location data */
                     return data.toString();
 
                 } catch (IOException e) {
@@ -85,18 +82,28 @@ public class WeatherService {
                     try {
                         /** Parse JSON data */
                         JSONObject query = new JSONObject(result);
-                        JSONObject data = query.optJSONObject("data");
+                        JSONObject data = query.optJSONObject("search_api");
                         /** API sends back an error object in case of any exception. If we receive
                          * an error object - we pass the error message back to the Activity using callback object */
-                        JSONArray error = data.optJSONArray("error");
-                        if (error!=null) {
-                            mServiceCallback.onFailure(location+ " "+ error.optJSONObject(0).optString("msg"));
-                            return;
+                        JSONObject errorData = query.optJSONObject("data");
+                        if (errorData !=null) {
+                            JSONArray error = errorData.optJSONArray("error");
+                            if (error != null) {
+                                mServiceCallback.onFailure(error.optJSONObject(0).optString("msg"));
+                                return;
+                            }
                         }
-                        /** If no error - create a WeatherData object and populate */
-                        WeatherData weatherData = new WeatherData();
-                        weatherData.populateData(data);
-                        mServiceCallback.onSuccess(weatherData);
+
+                        /** If no error - create a list of Location objects and populate data */
+                        ArrayList<Location> locationList = new ArrayList<>();
+                        JSONArray locationResults = data.getJSONArray("result");
+
+                        for (int count=0; count<locationResults.length(); count++) {
+                            Location location = new Location();
+                            location.populateData(locationResults.optJSONObject(count));
+                            locationList.add(location);
+                        }
+                        mServiceCallback.onSuccess(locationList);
 
                     } catch (JSONException e) {
                         /** In case of any exception, send the message back to Activity */
@@ -105,6 +112,6 @@ public class WeatherService {
                     }
                 }
             }
-        }.execute(location);
+        }.execute(query);
     }
 }
