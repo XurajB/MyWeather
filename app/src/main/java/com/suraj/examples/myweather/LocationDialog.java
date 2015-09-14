@@ -5,6 +5,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,19 +82,37 @@ public class LocationDialog extends DialogFragment implements ServiceCallback {
             }
         });
 
+        mEditTextLocation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().length()>3)
+                    getLocationData(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         return mLocationSelectView;
     }
 
     private void getLocationData(String query) {
         /** Hide soft keyboard */
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mEditTextLocation.getWindowToken(), 0);
+        //InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+        //        Context.INPUT_METHOD_SERVICE);
+        //imm.hideSoftInputFromWindow(mEditTextLocation.getWindowToken(), 0);
 
         /** Start the progress dialog */
         mProgressDialog = new ProgressDialog(getActivity());
         mProgressDialog.setMessage(getString(R.string.searching_message));
-        mProgressDialog.show();
+        //mProgressDialog.show();
 
         /** Call the weather service for weather data */
         LocationService mLocationService = new LocationService(this, getActivity());
