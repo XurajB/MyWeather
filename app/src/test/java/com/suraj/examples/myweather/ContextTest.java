@@ -1,6 +1,8 @@
 package com.suraj.examples.myweather;
 
+import android.app.Activity;
 import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +33,9 @@ public class ContextTest {
 
     @Mock
     Context context;
+
+    @Mock
+    AppCompatActivity activity;
 
     @Mock
     FileOutputStream fileOutputStream;
